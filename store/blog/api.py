@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view, action
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from blog.models import Post, Comment, Category
+
 from blog.serializers import PostSerializer, CommentSerializer, CategorySerializer
 from rest_framework import status
 from rest_framework.views import APIView
@@ -11,11 +12,19 @@ from rest_framework import mixins
 from rest_framework import generics
 from rest_framework import generics
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
+from blog.permissions import IsPostAuthorOrReadOnly
 
 
 class PostViewSet(ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = [IsPostAuthorOrReadOnly]
+
+    # def get_queryset(self):
+    #     queryset = super(PostViewSet, self).get_queryset()
+    #     return queryset.filter(self.request.user)
 
     @action(detail=True, methods=['GET'])
     def comments(self, request, pk=None):
